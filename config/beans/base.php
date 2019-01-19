@@ -1,20 +1,38 @@
 <?php
 
+/*
+ * This file is part of Swoft.
+ * (c) Swoft <group@swoft.org>
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 return [
-    'application' => [
-        'id'          => APP_NAME,
-        'name'        => APP_NAME,
-        'errorAction' => '/error/index',
-        'useProvider' => false,
+    'serverDispatcher' => [
+        'middlewares' => [
+            \Swoft\View\Middleware\ViewMiddleware::class,
+            // \Swoft\Devtool\Middleware\DevToolMiddleware::class,
+            // \Swoft\Session\Middleware\SessionMiddleware::class,
+        ]
     ],
-    'router'      => [
-        'class'          => \Swoft\Web\Router::class,
-        'ignoreLastSep'  => false,
+    'httpRouter'       => [
+        'ignoreLastSlash'  => false,
         'tmpCacheNumber' => 1000,
         'matchAll'       => '',
     ],
-    'renderer'    => [
-        'class'     => \Swoft\Web\ViewRenderer::class,
-        'viewsPath' => "@resources/views/",
+    'requestParser'    => [
+        'parsers' => [
+
+        ],
     ],
+    'view'             => [
+        'viewsPath' => '@resources/views/',
+    ],
+    'cache'            => [
+        'driver' => 'redis',
+    ],
+    'demoRedis' => [
+        'class' => \Swoft\Redis\Redis::class,
+        'poolName' => 'demoRedis'
+    ]
 ];

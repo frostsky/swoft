@@ -1,108 +1,149 @@
 <?php
+/**
+ * This file is part of Swoft.
+ *
+ * @link https://swoft.org
+ * @document https://doc.swoft.org
+ * @contact group@swoft.org
+ * @license https://github.com/swoft-cloud/swoft/blob/master/LICENSE
+ */
 
 namespace App\Controllers;
 
 use Psr\Http\Message\UploadedFileInterface;
-use Swoft\Bean\Annotation\AutoController;
-use Swoft\Bean\Annotation\RequestMapping;
-use Swoft\Web\Controller;
+use Swoft\Http\Message\Server\Request;
+use Swoft\Http\Server\Bean\Annotation\Controller;
+use Swoft\Http\Server\Bean\Annotation\RequestMapping;
 
 /**
- * @AutoController(prefix="/psr7")
- * @uses      Psr7Controller
- * @version   2017-11-05
- * @author    huangzhhui <huangzhwork@gmail.com>
- * @copyright Copyright 2010-2017 Swoft software
- * @license   PHP Version 7.x {@link http://www.php.net/license/3_0.txt}
+ * @Controller(prefix="/psr7")
  */
-class Psr7Controller extends Controller
+class Psr7Controller
 {
 
     /**
      * @RequestMapping()
+     * @param \Swoft\Http\Message\Server\Request $request
+     * @return array
      */
-    public function actionGet()
+    public function get(Request $request): array
     {
-        $param1 = $this->request()->query('param1');
-        $param2 = $this->request()->query('param2', 'defaultValue');
+        $param1 = $request->query('param1');
+        $param2 = $request->query('param2', 'defaultValue');
         return compact('param1', 'param2');
     }
 
     /**
      * @RequestMapping()
+     * @param \Swoft\Http\Message\Server\Request $request
+     * @return array
      */
-    public function actionPost()
+    public function post(Request $request): array
     {
-        $param1 = $this->request()->post('param1');
-        $param2 = $this->request()->post('param2');
+        $param1 = $request->post('param1');
+        $param2 = $request->post('param2');
         return compact('param1', 'param2');
     }
 
     /**
      * @RequestMapping()
+     * @param \Swoft\Http\Message\Server\Request $request
+     * @return array
      */
-    public function actionInput()
+    public function input(Request $request): array
     {
-        $param1 = $this->request()->input('param1');
-        $inputs = $this->request()->input();
+        $param1 = $request->input('param1');
+        $inputs = $request->input();
         return compact('param1', 'inputs');
     }
 
     /**
      * @RequestMapping()
      */
-    public function actionRaw()
+
+    /**
+     * @RequestMapping()
+     * @param \Swoft\Http\Message\Server\Request $request
+     * @return array
+     */
+    public function raw(Request $request): array
     {
-        $param1 = $this->request()->raw();
+        $param1 = $request->raw();
         return compact('param1');
     }
 
     /**
      * @RequestMapping()
-     * @return \Swoft\Web\Response
+     * @param \Swoft\Http\Message\Server\Request $request
+     * @return array
      */
-    public function actionCookies()
+    public function cookies(Request $request): array
     {
-        $cookie1 = $this->request()->cookie();
+        $cookie1 = $request->cookie();
         return compact('cookie1');
     }
 
     /**
      * @RequestMapping()
-     * @return \Swoft\Web\Response
+     * @param \Swoft\Http\Message\Server\Request $request
+     * @return array
      */
-    public function actionHeader()
+    public function header(Request $request): array
     {
-        $header1 = $this->request()->header();
-        $host = $this->request()->header('host');
+        $header1 = $request->header();
+        $host = $request->header('host');
         return compact('header1', 'host');
     }
 
     /**
      * @RequestMapping()
-     * @return \Swoft\Web\Response
+     * @param \Swoft\Http\Message\Server\Request $request
+     * @return array
      */
-    public function actionJson()
+    public function json(Request $request): array
     {
-        $json = $this->request()->json();
-        $jsonParam = $this->request()->json('jsonParam');
+        $json = $request->json();
+        $jsonParam = $request->json('jsonParam');
         return compact('json', 'jsonParam');
     }
 
     /**
      * @RequestMapping()
-     * @return \Swoft\Web\Response
+     * @param \Swoft\Http\Message\Server\Request $request
+     * @return array
      */
-    public function actionFiles()
+    public function files(Request $request): array
     {
-        $files = $this->request()->file();
+        $files = $request->file();
         foreach ($files as $file) {
             if ($file instanceof UploadedFileInterface) {
                 try {
-                    $file->moveTo('@runtime/uploadfiles/1.png');
+                    $file->moveTo('@runtime/uploadfiles/' . $file->getClientFilename());
                     $move = true;
                 } catch (\Throwable $e) {
                     $move = false;
+                }
+            }
+        }
+
+        return compact('move');
+    }
+
+    /**
+     * @RequestMapping()
+     * @param \Swoft\Http\Message\Server\Request $request
+     * @return array|null|\Swoft\Http\Message\Upload\UploadedFile
+     */
+    public function multiFilesInOneKey(Request $request)
+    {
+        $files = $request->file('files');
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFileInterface) {
+                try {
+                    $file->moveTo('@runtime/uploadfiles/' . $file->getClientFilename());
+                    $move[$file->getClientFilename()] = true;
+                } catch (\Throwable $e) {
+                    $move[$file->getClientFilename()] = false;
                 }
             }
         }
